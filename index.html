@@ -1,0 +1,111 @@
+      <!DOCTYPE html>
+<html>
+<head>
+  <title>Asturias, Paraiso Natural</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <!-- Include CARTO VL JS -->
+  <script src="https://cartodb.github.io/carto-vl/dist/carto-vl.js"></script>
+  <!-- Include Mapbox GL JS -->
+  <script src="https://libs.cartocdn.com/mapbox-gl/v0.45.0-carto1/mapbox-gl.js"></script>
+  <!-- Include Mapbox GL CSS -->
+  <link href="https://libs.cartocdn.com/mapbox-gl/v0.45.0-carto1/mapbox-gl.css" rel="stylesheet" />
+  <link href="https://carto.com/developers/carto-vl/examples/maps/style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="map"></div>
+<!--   <aside class="toolbox">
+    <div class="box">
+      <header>
+        <h1>Add layer</h1>
+      </header>
+      <section>
+        <p class="description open-sans">Add one CARTO layer to your map</p>
+      </section>
+      <footer class="js-footer"></footer>
+    </div>
+  </aside>
+ -->  <script>
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+      center: [-5.8, 43.3],
+      zoom: 8,
+      scrollZoom: false,
+      dragRotate: false,
+      touchZoomRotate: false,
+    });
+
+    // Define user
+    carto.setDefaultAuth({
+      user: 'pabloalonso',
+      apiKey: '5hq6OZ2G7WA3EIas_LG6cQ'
+    });
+
+    // Colors
+    let colors = ['#5F4690','#1D6996','#38A6A5','#0F8554','#73AF48','#EDAD08','#E17C05','#CC503E','#94346E','#6F4070','#994E95','#666666']
+    let color = 0;
+
+    // Polygon
+    const asturiasSource = new carto.source.SQL("SELECT * FROM spanish_adm1_ccaa WHERE nom_ccaa!='ASTURIAS'");
+    const asutiasViz = new carto.Viz(`
+      color: rgba(0, 0, 0, 0.8)
+    `);
+    const asturiasLayer = new carto.Layer('asturias', asturiasSource, asutiasViz);
+    asturiasLayer.addTo(map);
+
+
+    function createLayerFromDataset (datasetName, color) {
+      let source = new carto.source.Dataset(datasetName);
+      let viz = new carto.Viz(`
+        color: ${color}
+      `);
+
+      return new carto.Layer(datasetName, source, viz);
+    }
+
+    function onFeatureClicked (event) {
+    }
+
+    // Ski Resorts
+    let layers = [];
+
+    let skiResortsLayer = createLayerFromDataset('estaciones_de_esqui', colors[color++]);
+    layers.push(skiResortsLayer);
+    skiResortsLayer.addTo(map);
+
+    // Beaches
+    const beachesLayer = createLayerFromDataset('playas', colors[color++]);
+    layers.push(beachesLayer);
+    beachesLayer.addTo(map);
+
+    // Museums
+    const museumsLayer = createLayerFromDataset('museos_y_espacios_culturales', colors[color++]);
+    layers.push(museumsLayer);
+    museumsLayer.addTo(map);
+
+    // Nature
+    const natureLayer = createLayerFromDataset('espacios_naturales', colors[color++]);
+    layers.push(natureLayer);
+    natureLayer.addTo(map);
+
+    // Harbours 
+    const harboursLayer = createLayerFromDataset('puertos_deportivos', colors[color++]);
+    layers.push(harboursLayer);
+    harboursLayer.addTo(map);
+
+    const mapboxGLCanvas = document.querySelector('.mapboxgl-canvas');    
+    const interactivity = new carto.Interactivity(layers);
+    
+    interactivity.on('featureClick', onFeatureClicked);
+
+    interactivity.on('featureEnter', featureEvent => {
+      mapboxGLCanvas.style.cursor = 'pointer';
+    });
+
+    interactivity.on('featureLeave', featureEvent => {
+      mapboxGLCanvas.style.cursor = 'default';
+    });
+  </script>
+</body>
+</html>
