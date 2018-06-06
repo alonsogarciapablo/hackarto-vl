@@ -55,46 +55,67 @@
     asturiasLayer.addTo(map);
 
 
-    function createLayerFromDataset (datasetName, color) {
+    function createLayerFromDataset (datasetName, style) {
       let source = new carto.source.Dataset(datasetName);
-      let viz = new carto.Viz(`
-        color: ${color}
-      `);
+      let viz = new carto.Viz(style);
 
       return new carto.Layer(datasetName, source, viz);
-    }
-
-    function onFeatureClicked (event) {
     }
 
     // Ski Resorts
     let layers = [];
 
-    let skiResortsLayer = createLayerFromDataset('estaciones_de_esqui', colors[color++]);
-    layers.push(skiResortsLayer);
-    skiResortsLayer.addTo(map);
 
-    // Beaches
-    const beachesLayer = createLayerFromDataset('playas', colors[color++]);
-    layers.push(beachesLayer);
-    beachesLayer.addTo(map);
+    var layerDefinitions = {
+      'espacios_naturales': {
+        color: colors[color++],
+        fields: {
+          'name': {
+            column: 'nombre',
+            label: 'Nombre'
+          },
+          'title': {
+            column: 'informaciontitulo',
+            label: 'Titulo'
+          }
+        }
+      },
 
-    // Museums
-    const museumsLayer = createLayerFromDataset('museos_y_espacios_culturales', colors[color++]);
-    layers.push(museumsLayer);
-    museumsLayer.addTo(map);
+      'estaciones_de_esqui' : {
+        color: colors[color++],
+        fields: {}
+      },
 
-    // Nature
-    const natureLayer = createLayerFromDataset('espacios_naturales', colors[color++]);
-    layers.push(natureLayer);
-    natureLayer.addTo(map);
+      'playas': {
+        color: colors[color++],
+        fields: {}
+      },
 
-    // Harbours 
-    const harboursLayer = createLayerFromDataset('puertos_deportivos', colors[color++]);
-    layers.push(harboursLayer);
-    harboursLayer.addTo(map);
+      'museos_y_espacios_culturales' : {
+        color: colors[color++],
+        fields: {}
+      },
 
-    const mapboxGLCanvas = document.querySelector('.mapboxgl-canvas');    
+      'puertos_deportivos': {
+        color: colors[color++],
+        fields: {}
+      }
+    }
+
+    for (var layerId in layerDefinitions) {
+      var layerDefinition = layerDefinitions[layerId];
+      var style = `color: ${layerDefinition.color}`;
+      
+      for (var fieldId in layerDefinition.fields) {
+        style = `${style}\n@${fieldId}: $${layerDefinition.fields[fieldId].column}`
+      }
+
+      var layer = createLayerFromDataset(layerId, style);
+      layers.push(layer);
+      layer.addTo(map);
+    }
+
+    const mapboxGLCanvas = document.querySelector('.mapboxgl-canvas');
     const interactivity = new carto.Interactivity(layers);
     
     interactivity.on('featureClick', onFeatureClicked);
@@ -106,6 +127,19 @@
     interactivity.on('featureLeave', featureEvent => {
       mapboxGLCanvas.style.cursor = 'default';
     });
+
+    function onFeatureClicked (event) {
+      var features = event.features;
+      if (features.length) {
+        var feature = features[0];
+        var layerDefinition = layerDefinitions[feature.layerId];
+        for (var fieldId in layerDefinition.fields) {
+          var field = layerDefinition.fields[fieldId];
+          console.log(field.label);
+          console.log(features[0].variables[fieldId].value);
+        }
+      }
+    }
   </script>
 </body>
 </html>
