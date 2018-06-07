@@ -204,8 +204,31 @@
 
     const mapboxGLCanvas = document.querySelector('.mapboxgl-canvas');
     const interactivity = new carto.Interactivity(layer);
-    
-    interactivity.on('featureClick', onFeatureClicked);
+    const delay = 50;
+    interactivity.on('featureClick', function (event) {
+      var features = event.features;
+      if (features.length) {
+        var feature = features[0];
+
+        clickedFeatureId = feature.id;
+        feature.color.blendTo('#414c72', delay)
+        feature.width.blendTo('15', delay);
+
+        showBeach(feature.variables['name'].value,
+          feature.variables['image'].value,
+          feature.variables['description'].value,
+          feature.variables['howtogetthere'].value,
+          feature.variables['services'].value);
+      }
+    });
+
+    interactivity.on('featureClickOut', event => {
+      if (event.features.length > 0) {
+        const feature = event.features[0];
+        feature.color.reset(delay);
+        feature.width.reset(delay);
+      }
+    });
 
     interactivity.on('featureEnter', featureEvent => {
       mapboxGLCanvas.style.cursor = 'pointer';
@@ -258,31 +281,6 @@
         event.preventDefault();
         rightContainer.classList.add('is-collapsed');
       });
-    }
-
-
-    function onFeatureClicked (event) {
-      var features = event.features;
-      if (features.length) {
-        var feature = features[0];
-
-
-        var text = `<h1>${feature.variables['name'].value}</h1>`;
-        // for (var fieldId in layerDefinition.fields) {
-        //   var field = layerDefinition.fields[fieldId];
-        //   text += field.label;
-        //   console.log(field.label);
-        //   console.log(features[0].variables[fieldId].value);
-        // }
-        // 
-        text += `<img src=${feature.variables['image'].value} />`;
-
-        showBeach(feature.variables['name'].value,
-          feature.variables['image'].value,
-          feature.variables['description'].value,
-          feature.variables['howtogetthere'].value,
-          feature.variables['services'].value);
-      }
     }
   </script>
 </body>
