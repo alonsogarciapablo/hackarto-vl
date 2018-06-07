@@ -157,11 +157,15 @@
 
 
   <script>
+
+    const ORIGINAL_ZOOM = 8;
+    const ORIGINAL_CENTER = [-5.8, 43.5];
+
     const map = new mapboxgl.Map({
       container: 'map',
       style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
-      center: [-5.8, 43.5],
-      zoom: 8,
+      center: ORIGINAL_CENTER,
+      zoom: ORIGINAL_ZOOM,
       scrollZoom: false,
       dragRotate: false,
       touchZoomRotate: false,
@@ -219,6 +223,11 @@
           feature.variables['description'].value,
           feature.variables['howtogetthere'].value,
           feature.variables['services'].value);
+
+        map.flyTo({
+          center: [event.coordinates.lng + 0.2, event.coordinates.lat],
+          zoom: 10
+        });
       }
     });
 
@@ -280,6 +289,10 @@
       closeButtonElement.addEventListener('click', function (event) {
         event.preventDefault();
         rightContainer.classList.add('is-collapsed');
+        map.flyTo({
+          center: ORIGINAL_CENTER,
+          zoom: ORIGINAL_ZOOM
+        });
       });
     }
   </script>
